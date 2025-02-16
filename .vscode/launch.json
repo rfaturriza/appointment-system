@@ -10,17 +10,6 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/backend/main.go"
-    },
-    {
-        "name": "Launch Frontend",
-        "type": "chrome",
-        "request": "launch",
-        "url": "http://localhost:3000",
-        "webRoot": "${workspaceFolder}/frontend",
-        "sourceMapPathOverrides": {
-            "webpack:///src/*": "${webRoot}/*"
-        },
-        "sourceMaps": true
     }
   ]
 }
