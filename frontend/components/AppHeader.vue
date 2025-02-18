@@ -27,11 +27,11 @@
           Logout
         </button>
         <button
-          data-collapse-toggle="navbar-sticky"
+          @click="toggleMobileMenu"
           type="button"
           class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
           aria-controls="navbar-sticky"
-          aria-expanded="false"
+          :aria-expanded="showMobileMenu.toString()"
         >
           <span class="sr-only">Open main menu</span>
           <svg
@@ -52,7 +52,8 @@
         </button>
       </div>
       <div
-        class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
+        class="items-center justify-between w-full md:flex md:w-auto md:order-1"
+        :class="{ hidden: !showMobileMenu }"
         id="navbar-sticky"
       >
         <ul
@@ -81,6 +82,8 @@
 const router = useRouter();
 const { isAuthenticated } = useAuth();
 const currentRoute = ref(router.currentRoute.value.path);
+const showMobileMenu = ref(false);
+
 const routes = {
   "/": "Home",
   "/appointments": "Appointment",
@@ -90,6 +93,10 @@ const routes = {
 watchEffect(() => {
   currentRoute.value = router.currentRoute.value.path;
 });
+
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value;
+};
 
 const logout = () => {
   localStorage.removeItem("token");
