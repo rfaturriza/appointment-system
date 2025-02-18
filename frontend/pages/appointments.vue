@@ -1,62 +1,104 @@
 <template>
-  <div class="container">
-    <!-- Left Column - Appointments List -->
-    <div class="appointments-list">
-      <h1>Upcoming Appointments</h1>
+  <div class="container mx-auto p-4">
+    <Modal :show="showModal" @close="showModal = false">
+      <template #header>
+        <h3 class="text-xl font-semibold">Create New Appointment</h3>
+      </template>
+      <div>
+        <form
+          @submit.prevent="createAppointment"
+          class="flex flex-col space-y-4"
+        >
+          <div class="form-group">
+            <label
+              for="title"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >Title</label
+            >
+            <input
+              type="text"
+              id="title"
+              v-model="newAppointment.title"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label
+              for="start"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >Start Time</label
+            >
+            <input
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              id="start"
+              v-model="newAppointment.start"
+              type="datetime-local"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label
+              for="end"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >End Time</label
+            >
+            <input
+              id="end"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              v-model="newAppointment.end"
+              type="datetime-local"
+              required
+            />
+          </div>
+
+          <div class="flex justify-end space-x-4 py-4">
+            <button
+              @click="showModal = false"
+              class="px-4 py-2 text-gray-600 bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="isSubmitting"
+              class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+            >
+              {{ isSubmitting ? "Creating..." : "Create Appointment" }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </Modal>
+    <div class="space-y-4">
+      <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white py-2">
+          Upcoming Appointments
+        </h1>
+        <button
+          @click="showModal = true"
+          class="px-4 py-2 bg-primary-700 text-white rounded-md hover:bg-primary-600"
+        >
+          Create New Appointment
+        </button>
+      </div>
       <div v-if="loading">Loading...</div>
-      <ul v-else>
+      <ul v-else class="space-y-4">
         <li
           v-for="appointment in appointments"
           :key="appointment.id"
-          class="appointment-item"
+          class="bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-md"
         >
-          {{ appointment.Title }}
-          <div class="appointment-time">
+          <strong class="text-xl">{{ appointment.Title }}</strong>
+
+          <p class="text-gray-600">
             {{ formatDate(appointment.Start) }} to
             {{ formatDate(appointment.End) }}
-          </div>
+          </p>
         </li>
       </ul>
-    </div>
-
-    <!-- Right Column - New Appointment Form -->
-    <div class="appointment-form">
-      <h2>Create New Appointment</h2>
-      <form @submit.prevent="createAppointment">
-        <div class="form-group">
-          <label for="title">Title</label>
-          <input
-            id="title"
-            v-model="newAppointment.title"
-            type="text"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="start">Start Time</label>
-          <input
-            id="start"
-            v-model="newAppointment.start"
-            type="datetime-local"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="end">End Time</label>
-          <input
-            id="end"
-            v-model="newAppointment.end"
-            type="datetime-local"
-            required
-          />
-        </div>
-
-        <button type="submit" :disabled="isSubmitting">
-          {{ isSubmitting ? "Creating..." : "Create Appointment" }}
-        </button>
-      </form>
     </div>
   </div>
 </template>
@@ -73,6 +115,7 @@ definePageMeta({
 const appointments = ref([]);
 const loading = ref(true);
 const isSubmitting = ref(false);
+const showModal = ref(false);
 
 const newAppointment = ref({
   title: "",
@@ -82,7 +125,7 @@ const newAppointment = ref({
 
 const formatDate = (date) => {
   if (!date) return "";
-  return format(new Date(date), "MM/dd/yyyy h:mm a");
+  return format(new Date(date), "eeee, do MMMM yyyy, h:mm a");
 };
 
 const fetchAppointments = async () => {
@@ -116,6 +159,8 @@ const createAppointment = async () => {
       end: "",
     };
 
+    // Close modal
+    showModal.value = false;
     // Refresh appointments list
     await fetchAppointments();
   } catch (error) {
@@ -128,74 +173,3 @@ const createAppointment = async () => {
 
 onMounted(fetchAppointments);
 </script>
-
-<style scoped>
-.container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  padding: 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.appointments-list,
-.appointment-form {
-  padding: 1rem;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-}
-
-.appointment-item {
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.appointment-time {
-  font-size: 0.9em;
-  color: #666;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-}
-
-input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:disabled {
-  background-color: #cccccc;
-}
-
-button:hover:not(:disabled) {
-  background-color: #45a049;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-</style>
