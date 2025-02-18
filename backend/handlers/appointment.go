@@ -92,7 +92,7 @@ func GetUpcomingAppointments(c *gin.Context) {
     timeNowTz:= time.Now().In(timezone)
     timeNowInUTC := timeNowTz.UTC()
     fmt.Println(timeNowTz)
-    result := db.DB.Preload("Creator").Where("start > ?", timeNowInUTC).Find(&appointments)
+    result := db.DB.Preload("Creator").Where("start > ?", timeNowInUTC).Order("start ASC").Find(&appointments)
     if result.Error != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching appointments"})
         return
