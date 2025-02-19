@@ -7,9 +7,6 @@ export default defineNuxtConfig({
       apiBaseUrl: "http://localhost:8080",
     },
   },
-  modules: ['@nuxtjs/tailwindcss'],
-  tailwindcss: {
-    exposeConfig: true,
-    viewer: true,
-  }
+  modules: ["@nuxt/ui"],
+  css: ["~/assets/css/main.css"],
 });

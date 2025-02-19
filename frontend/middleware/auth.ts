@@ -1,11 +1,7 @@
 export default defineNuxtRouteMiddleware((to, from) => {
-  // Skip middleware on server
-  if (process.server) return;
+  const token = useCookie("token");
 
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    alert("You need to be logged in to access this page");
+  if (!token.value) {
     return navigateTo("/login");
   }
 });

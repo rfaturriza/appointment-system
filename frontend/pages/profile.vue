@@ -6,30 +6,50 @@
     <p class="mt-4 text-gray-600 dark:text-gray-400">
       This is your user profile page.
     </p>
-    <p class="mt-4 text-gray-600 dark:text-gray-400">
-      Full Name: <strong>{{ user?.Name }}</strong>
-    </p>
-    <p class="mt-4 text-gray-600 dark:text-gray-400">
-      Username: <strong>{{ user?.Username }}</strong>
-    </p>
-    <p class="mt-4 text-gray-600 dark:text-gray-400">
-      Preferred Timezone: <strong>{{ user?.PreferredTimezone }}</strong>
-    </p>
+    <div v-if="status === 'pending'">
+      <span class="text-gray-300">Loading user profile...</span>
+    </div>
+    <div v-else-if="status === 'error'">
+      <UAlert
+        title="An error occurred"
+        :description="error?.data?.error ?? 'Unknown error, please try again'"
+        color="error"
+        variant="soft"
+        :actions="[
+          {
+            label: 'Retry',
+            color: 'error',
+            onClick: () => {
+              refresh();
+            },
+          },
+        ]"
+      />
+    </div>
+    <div v-else>
+      <p class="mt-4 text-gray-600 dark:text-gray-400">
+        Full Name: <strong>{{ user?.Name }}</strong>
+      </p>
+      <p class="mt-4 text-gray-600 dark:text-gray-400">
+        Username: <strong>{{ user?.Username }}</strong>
+      </p>
+      <p class="mt-4 text-gray-600 dark:text-gray-400">
+        Preferred Timezone: <strong>{{ user?.PreferredTimezone }}</strong>
+      </p>
+    </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 definePageMeta({
   middleware: "auth",
 });
-const user = ref(null);
 
-onMounted(async () => {
-  try {
-    const { data } = await useAuthApi("/users/me");
-    user.value = data?.value || {};
-  } catch (error) {
-    user.value = {};
-  }
-});
+interface User {
+  Name: string;
+  Username: string;
+  PreferredTimezone: string;
+}
+
+const { data: user, status, error, refresh } = useAuthApi<User>("/users/me");
 </script>

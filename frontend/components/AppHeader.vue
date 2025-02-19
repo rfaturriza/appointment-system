@@ -10,22 +10,8 @@
         >
       </NuxtLink>
       <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-        <NuxtLink
-          v-if="!isAuthenticated"
-          type="button"
-          to="/login"
-          class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        >
-          Login
-        </NuxtLink>
-        <button
-          v-if="isAuthenticated"
-          type="button"
-          v-on:click="logout"
-          class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        >
-          Logout
-        </button>
+        <UButton v-if="!isAuthenticated" to="/login"> Login </UButton>
+        <UButton v-if="isAuthenticated" v-on:click="logout"> Logout </UButton>
         <button
           @click="toggleMobileMenu"
           type="button"
@@ -99,7 +85,8 @@ const toggleMobileMenu = () => {
 };
 
 const logout = () => {
-  localStorage.removeItem("token");
-  window.location.reload();
+  const token = useCookie("token");
+  token.value = null;
+  router.push("/login");
 };
 </script>

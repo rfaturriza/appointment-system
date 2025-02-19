@@ -15,7 +15,7 @@
 
         <!-- Modal container -->
         <div
-          class="relative bg-white rounded-lg p-6 mx-4 max-w-md w-full shadow-xl transition-all"
+          class="relative rounded-lg p-6 mx-4 max-w-md w-full shadow-xl transition-all"
         >
           <!-- Close button -->
           <button

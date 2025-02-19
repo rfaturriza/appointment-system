@@ -1,15 +1,19 @@
 <template>
-  <div class="font-body">
-    <NuxtLayout>
-      <NuxtPage />
-    </NuxtLayout>
-  </div>
+  <UApp>
+    <ToastProvider>
+      <ToastRoot>
+        <ToastTitle />
+        <ToastDescription />
+        <ToastAction />
+        <ToastClose />
+      </ToastRoot>
+
+      <ToastViewport />
+    </ToastProvider>
+    <div class="font-body">
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
+    </div>
+  </UApp>
 </template>
-
-<script setup>
-const { setIsAuthenticated } = useAuth();
-
-onMounted(() => {
-  setIsAuthenticated(!!localStorage.getItem("token"));
-});
-</script>

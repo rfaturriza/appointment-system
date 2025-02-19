@@ -1,15 +1,15 @@
 import type { UseFetchOptions } from "nuxt/app";
 
-export const useAuthApi = (
+export const useAuthApi: typeof useFetch = (
   url: string | (() => string),
   options: UseFetchOptions<null> = {}
 ) => {
   const config = useRuntimeConfig();
+  const token = useCookie("token");
 
   const customFetch = $fetch.create({
     baseURL: config.public.apiBaseUrl as string,
     onRequest({ options }) {
-      const token = localStorage.getItem("token");
       if (token) {
         console.log("[fetch request] Authorization header created");
         const currentHeaders =
@@ -18,7 +18,7 @@ export const useAuthApi = (
             : options.headers;
         options.headers = new Headers({
           ...(currentHeaders as Record<string, string>),
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token.value}`,
         });
       }
     },
@@ -28,7 +28,7 @@ export const useAuthApi = (
         status: response?.status,
       });
       if (response?.status === 401) {
-        localStorage.removeItem("token");
+        token.value = null;
       }
     },
     onResponseError({ response }) {

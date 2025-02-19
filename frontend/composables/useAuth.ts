@@ -1,12 +1,11 @@
 export const useAuth = () => {
-  const isAuthenticated = useState<boolean>(() => false);
-
-  const setIsAuthenticated = (value: boolean) => {
-    isAuthenticated.value = value;
-  };
+  const token = useCookie("token");
+  const isAuthenticated = useState<boolean>(() => !!token.value);
+  watch(token, () => {
+    isAuthenticated.value = !!token.value;
+  });
 
   return {
     isAuthenticated,
-    setIsAuthenticated,
   };
 };

@@ -12,7 +12,16 @@
           >
             Sign in to your account
           </h1>
-          <form class="space-y-4 md:space-y-6" @submit.prevent="login">
+          <form class="space-y-4 md:space-y-6" @submit.prevent="handleSubmit">
+            <UAlert
+              v-show="status === 'error'"
+              title="Something went wrong"
+              :description="
+                error?.data?.error ?? 'Unknown error, please try again'
+              "
+              color="error"
+              variant="soft"
+            />
             <div>
               <label
                 for="username"
@@ -29,11 +38,14 @@
               />
             </div>
 
-            <button
+            <UButton
+              size="xl"
+              :block="true"
               type="submit"
-              class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-              v-text="isSubmitting ? 'Signing in...' : 'Sign in'"
-            ></button>
+              :loading="status === 'pending'"
+            >
+              Sign in
+            </UButton>
           </form>
         </div>
       </div>
@@ -41,39 +53,34 @@
   </section>
 </template>
 
-<script setup>
-const router = useRouter();
+<script setup lang="ts">
+interface LoginResponse {
+  token: string;
+}
+const token = useCookie("token");
 const username = ref("");
-const isSubmitting = ref(false);
-const { setIsAuthenticated } = useAuth();
+const loginFormData = new FormData();
+watch(username, () => {
+  loginFormData.set("username", username.value);
+});
 
-const login = async () => {
-  isSubmitting.value = true;
-  try {
-    var bodyFormData = new FormData();
-    bodyFormData.set("username", username.value);
-    const response = await useApi("/login", {
-      method: "POST",
-      body: bodyFormData,
-    });
+const {
+  data,
+  error,
+  status,
+  execute: login,
+} = useApi<LoginResponse>("/login", {
+  method: "POST",
+  body: loginFormData,
+  immediate: false,
+});
 
-    if (response.status.value == "error") {
-      const errorMessage = response.error.value.data.error;
-      if (errorMessage) {
-        alert(`Login failed: ${errorMessage}`);
-        return;
-      }
-      alert("Login failed, please try again");
-      return;
-    }
-    localStorage.setItem("token", response.data.value.token);
-    setIsAuthenticated(true);
-    router.push({ path: "/" });
-  } catch (error) {
-    console.error(error);
-    alert("Login failed, please try again");
-  } finally {
-    isSubmitting.value = false;
+const handleSubmit = async (event: Event) => {
+  event.preventDefault();
+  await login();
+  if (data?.value) {
+    token.value = data.value.token;
+    await navigateTo("/");
   }
 };
 </script>
